@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Popular Movies App</string>
     <string name="noData">Problem loading data. Please Try Again!!</string>
-    <string name="movieAPIKEY">api key</string>
+    <string name="movieAPIKEY">b52faba54e340f408387996c68ed1443</string>
     <string name="popular_movies">Popular Movies</string>
     <string name="toprated_movies">Top Rated Movies</string>
 </resources>
