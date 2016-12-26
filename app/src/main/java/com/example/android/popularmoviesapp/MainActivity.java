@@ -13,12 +13,15 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.android.popularmoviesapp.data.Movie;
 import com.example.android.popularmoviesapp.data.MoviePrefernces;
+import com.example.android.popularmoviesapp.utilities.MovieJSONUtils;
 import com.example.android.popularmoviesapp.utilities.NetworkUtils;
 
 import java.net.URL;
+import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler {
 
 
     private final static String PREFERENCEONE="popular";
@@ -26,9 +29,11 @@ public class MainActivity extends AppCompatActivity {
     private MoviePrefernces movieprefernce;
     private RecyclerView mRecyclerView;
 
+
     private TextView mErrorMessageView;
 
     private ProgressBar mLoadingIndicator;
+    private MoviesAdapter moviesAdapter;
     public static String APIKEY;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +43,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         APIKEY=getString(R.string.movieAPIKEY);
+        moviesAdapter=new MoviesAdapter(this);
 
         movieprefernce=new MoviePrefernces(this);
 
         mRecyclerView=(RecyclerView)findViewById(R.id.recyclerview_movies);
+        mRecyclerView.setAdapter(moviesAdapter);
 
         GridLayoutManager layoutManager
                 = new GridLayoutManager(this,2);
 
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
+
+
 
         mErrorMessageView=(TextView) findViewById(R.id.error_msg);
 
@@ -74,8 +83,14 @@ public class MainActivity extends AppCompatActivity {
         mErrorMessageView.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onClick(Movie movie) {
+        Log.d("MNIN MOv",movie.toString());
 
-    public class FetchMoviesDataTask extends AsyncTask<String, Void, String[]> {
+    }
+
+
+    public class FetchMoviesDataTask extends AsyncTask<String, Void,  ArrayList<Movie>> {
 
 
         @Override
@@ -85,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected  ArrayList<Movie> doInBackground(String... params) {
 
 
             if (params.length == 0) {
@@ -93,17 +108,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             String prefernce = params[0];
-            URL weatherRequestUrl = NetworkUtils.buildApiUrl(prefernce,MainActivity.APIKEY);
+            URL movieUrl = NetworkUtils.buildApiUrl(prefernce,MainActivity.APIKEY);
 
             try {
                 String jsonMovies = NetworkUtils
-                        .getResponseFromHttpUrl(weatherRequestUrl);
+                        .getResponseFromHttpUrl(movieUrl);
 
                 Log.v("MainActivity got json",jsonMovies);
+                ArrayList<Movie> movieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
 
-               String[] sample={"anccc"};
 
-                return sample;
+                return movieArrayList;
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -112,11 +127,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String[] weatherData) {
+        protected void onPostExecute( ArrayList<Movie> movieArrayList) {
+
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (weatherData != null) {
+            if (movieArrayList != null) {
                 showMoviesData();
-               // mForecastAdapter.setWeatherData(weatherData);
+                moviesAdapter.setMoviesData(movieArrayList);
             } else {
                 showErrorView();
             }
@@ -186,11 +202,12 @@ public class MainActivity extends AppCompatActivity {
          */
         switch (item.getItemId()) {
             case R.id.top_rated_action:
-
-                new FetchMoviesDataTask().execute(PREFERENCETWO);
+                moviesAdapter.setMoviesData(null);
+                 new FetchMoviesDataTask().execute(PREFERENCETWO);
                 movieprefernce.setMoviePrfrnce(PREFERENCETWO);
                 return true;
             case R.id.popular_action:
+                moviesAdapter.setMoviesData(null);
                 new FetchMoviesDataTask().execute(PREFERENCEONE);
                 movieprefernce.setMoviePrfrnce(PREFERENCEONE);
                 return true;

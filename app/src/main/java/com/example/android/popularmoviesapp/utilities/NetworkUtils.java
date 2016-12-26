@@ -20,6 +20,7 @@ public class NetworkUtils {
 
     private final static String BASE_IMG_URL="http://image.tmdb.org/t/p/";
     private final static String API_KEY_PARAM="api_key";
+    private final static String IMAGE_SIZE="w185";
 
 
     public static URL buildApiUrl(String prefernce, String apiKey){
@@ -37,6 +38,21 @@ public class NetworkUtils {
 
         Log.d("NETWORKUTILS", "URL " + url);
 
+        return url;
+    }
+
+    public static URL buildImageURL(String imageresponse){
+        Uri builtURI = Uri.parse(BASE_IMG_URL).buildUpon()
+                .appendPath(IMAGE_SIZE)
+                .appendEncodedPath(imageresponse)
+                .build();
+
+        URL url = null;
+
+        try { url = new URL(builtURI.toString()); }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         return url;
     }
 
