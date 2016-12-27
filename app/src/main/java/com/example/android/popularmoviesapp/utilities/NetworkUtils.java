@@ -10,9 +10,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
-/**
- * Created by Neeraj.Moudgil on 12/26/2016.
- */
 
 public class NetworkUtils {
 
@@ -21,6 +18,8 @@ public class NetworkUtils {
     private final static String BASE_IMG_URL="http://image.tmdb.org/t/p/";
     private final static String API_KEY_PARAM="api_key";
     private final static String IMAGE_SIZE="w185";
+
+
 
 
     public static URL buildApiUrl(String prefernce, String apiKey){

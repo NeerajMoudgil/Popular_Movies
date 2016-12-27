@@ -7,19 +7,33 @@ public class Movie {
     private String title ;
     private long rating ;
     private long popularity;
-    private String synopsis ;
+    private String overview ;
     private String releaseDate;
 
     private URL posterPath;
 
-    public Movie(String title, long rating, long popularity, String synopsis, String releaseDate, URL posterPath) {
+    /**
+     * constructor Creates movie object
+     * @param title
+     * @param rating
+     * @param popularity
+     * @param overview
+     * @param releaseDate
+     * @param posterPath
+     */
+
+    public Movie(String title, long rating, long popularity, String overview, String releaseDate, URL posterPath) {
         this.title = title;
         this.rating = rating;
         this.popularity = popularity;
-        this.synopsis = synopsis;
+        this.overview = overview;
         this.releaseDate = releaseDate;
         this.posterPath = posterPath;
     }
+
+    /**
+     * Below are the setter and getter methods for all properties of Movie Object type
+     */
 
     public String getTitle() {
         return title;
@@ -37,12 +51,12 @@ public class Movie {
         this.rating = rating;
     }
 
-    public String getSynopsis() {
-        return synopsis;
+    public String getOverview() {
+        return overview;
     }
 
-    public void setSynopsis(String synopsis) {
-        this.synopsis = synopsis;
+    public void setOverview(String synopsis) {
+        this.overview = synopsis;
     }
 
     public long getPopularity() {
@@ -68,4 +82,6 @@ public class Movie {
     public void setPosterPath(URL posterPath) {
         this.posterPath = posterPath;
     }
+
+
 }

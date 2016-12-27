@@ -1,5 +1,8 @@
 package com.example.android.popularmoviesapp;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +38,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private ProgressBar mLoadingIndicator;
     private MoviesAdapter moviesAdapter;
     public static String APIKEY;
+
+    /**
+     * creates the activity first screen that will appear on launch
+     * initialize reference to all the views in main activity layout to refer later in the code
+     * assigns GridLayoutManager to recyclerview with 2 cloumns
+     * executes the FetchMoviesDataTask (defined below) to perform async task to get response in background
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -68,6 +79,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     }
 
+    /**
+     * shows error view if fail to fetch movies
+     * hides view that will show movies
+     */
+
     private void showMoviesData()
     {
         mErrorMessageView.setVisibility(View.INVISIBLE);
@@ -75,6 +91,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mRecyclerView.setVisibility(View.VISIBLE);
 
     }
+    /**
+     * hides error view if fail to fetch movies
+     * shows view when able to fetch movies
+     */
 
     private void showErrorView()
     {
@@ -83,12 +103,29 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mErrorMessageView.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * click event on each view of recyclerview
+     * @param movie
+     */
+
     @Override
     public void onClick(Movie movie) {
         Log.d("MNIN MOv",movie.toString());
+        Intent intent =new Intent(MainActivity.this,MovieDetails.class);
+        intent.putExtra("title",movie.getTitle());
 
+        intent.putExtra("rating",movie.getRating());
+        intent.putExtra("popularity",movie.getPopularity());
+        intent.putExtra("overview",movie.getOverview());
+        intent.putExtra("releasedate",movie.getReleaseDate());
+        intent.putExtra("posterpath",movie.getPosterPath().toString());
+        startActivity(intent);
     }
 
+    /**
+     * class defined that will perform background task to fetch data from themovie API
+     * on getting the data sets data to adapter
+     */
 
     public class FetchMoviesDataTask extends AsyncTask<String, Void,  ArrayList<Movie>> {
 
@@ -109,6 +146,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
             String prefernce = params[0];
             URL movieUrl = NetworkUtils.buildApiUrl(prefernce,MainActivity.APIKEY);
+            Boolean isonline=isOnline();
+            Log.d("isOnline",String.valueOf(isonline));
+            if(!isOnline()) {
+                return null;
+            }
 
             try {
                 String jsonMovies = NetworkUtils
@@ -124,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 e.printStackTrace();
                 return null;
             }
+
         }
 
         @Override
@@ -138,6 +181,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             }
         }
     }
+
+    /**
+     * checks the connectivity
+     * @return true if internet is available else false
+     */
+    public  boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null &&
+                cm.getActiveNetworkInfo().isConnectedOrConnecting();
+    }
+
     /**
      * Inflate filter options menu
      * @param menu

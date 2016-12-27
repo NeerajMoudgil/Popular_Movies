@@ -40,14 +40,14 @@ public class MovieJSONUtils {
             String title = movie.getString(MOVIE_TITLE);
             long rating = movie.getLong(MOVIE_RATING);
             long popularity = movie.getLong(MOVIE_POPULARITY);
-            String synopsis = movie.getString(MOVIE_OVERVIEW);
+            String overview = movie.getString(MOVIE_OVERVIEW);
             String releaseDate = movie.getString(MOVIE_RELEASE_DATE);
 
             String posterPath = movie.getString(POSTER_PATH);
 
             URL moviePosterUrl = NetworkUtils.buildImageURL(posterPath);
 
-            movieArryList.add( new Movie(title, rating, popularity, synopsis, releaseDate, moviePosterUrl));
+            movieArryList.add( new Movie(title, rating, popularity, overview, releaseDate, moviePosterUrl));
         }
 
         return movieArryList;

@@ -11,16 +11,32 @@ public class MoviePrefernces {
     private final static String MOVIESETTING="moviesetting";
     private String moviefilter;
 
+    /**
+     * get the shared preference or create if doesn't exist
+     * @param c
+     */
+
     public MoviePrefernces(Context c) {
         sharedPreferences= c.getSharedPreferences(MYPREFERENCE,0);
 
     }
+
+    /**
+     * gets the type of movies user prefer to see
+     * @return moviefilter string stored as selected by user from menu
+     */
 
     public String getMoviePrfrnce(){
 
         moviefilter= sharedPreferences.getString(MOVIESETTING,null);
         return moviefilter;
     }
+
+    /**
+     * /**
+     * sets the type of movies user prefer to see
+     * @param s
+     */
 
     public void setMoviePrfrnce(String s){
         moviefilter=s;

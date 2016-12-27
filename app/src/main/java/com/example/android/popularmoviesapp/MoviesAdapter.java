@@ -14,6 +14,9 @@ import com.squareup.picasso.Picasso;
 import java.net.URL;
 import java.util.ArrayList;
 
+/**
+ * class defines the list of movies
+ */
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
 
@@ -25,6 +28,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     private final MoviesOnClickHandler mClickHandler;
 
 
+    /**
+     * The interface that provides onclick.
+     */
     public interface MoviesOnClickHandler {
         void onClick(Movie movie);
     }
@@ -85,6 +91,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         }
     }
 
+    /**
+     * sets the arraylist to list of new movies
+     * @param moviesList new movie list to be displayed
+     */
     public void setMoviesData(ArrayList<Movie> moviesList)
     {
         movieArrList=moviesList;
