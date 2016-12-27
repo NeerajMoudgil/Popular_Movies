@@ -252,24 +252,65 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        /**
-         * set the user prefernce as per selected option from menu setting.
-         * setMoviePrfrnce method defined in MoviepPrefernces class
-         */
         switch (item.getItemId()) {
             case R.id.top_rated_action:
-                moviesAdapter.setMoviesData(null);
-                 new FetchMoviesDataTask().execute(PREFERENCETWO);
-                movieprefernce.setMoviePrfrnce(PREFERENCETWO);
+                loadTopRatedMovies(PREFERENCETWO);
                 return true;
             case R.id.popular_action:
-                moviesAdapter.setMoviesData(null);
-                new FetchMoviesDataTask().execute(PREFERENCEONE);
-                movieprefernce.setMoviePrfrnce(PREFERENCEONE);
+                loadPopularMovies(PREFERENCEONE);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    /**
+     * set the user preference as per selected option from menu setting.
+     * setMoviePrfrnce method defined in MoviepPrefernces class
+     * @param preference clicked from menu settings
+     */
+
+    public void loadPopularMovies(String preference)
+    {
+       Boolean errorVisible= checkViewVisibility(mErrorMessageView);
+        Boolean samePreference = movieprefernce.checkSamePreferenceClick(preference);
+        if(!samePreference || errorVisible)
+        {
+            moviesAdapter.setMoviesData(null);
+            new FetchMoviesDataTask().execute(preference);
+            movieprefernce.setMoviePrfrnce(preference);
+
+        }
+
+    }
+    public void loadTopRatedMovies(String preference)
+    {
+        Boolean errorVisible= checkViewVisibility(mErrorMessageView);
+
+        Boolean samePreference = movieprefernce.checkSamePreferenceClick(preference);
+        if(!samePreference || errorVisible)
+        {
+            moviesAdapter.setMoviesData(null);
+            new FetchMoviesDataTask().execute(preference);
+            movieprefernce.setMoviePrfrnce(preference);
+        }
+
+    }
+
+    /**
+     *
+     * @param v type of view to check
+     * @return true if view visible else false
+     */
+
+    public boolean checkViewVisibility(View v)
+    {
+        int visible=v.getVisibility();
+        Log.i("MAINACTIVITY VISIBILITY",String.valueOf(visible));
+        if(visible==4)
+            return false;
+        else
+            return true;
     }
 
 

@@ -3,64 +3,74 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<LinearLayout
-    android:id="@+id/activity_movie_details"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.example.android.popularmoviesapp.MovieDetails">
-
-    <TextView
-        android:id="@+id/movie_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/titlebgColor"
-        android:gravity="left"
-        android:padding="10dp"
-        android:textSize="56sp"
-        android:textColor="@color/titletextColor"/>
 
     <LinearLayout
+        android:id="@+id/activity_movie_details"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.example.android.popularmoviesapp.MovieDetails">
 
-        <ImageView
-            android:id="@+id/movie_img"
-            android:layout_width="150dp"
-            android:layout_height="200dp"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            tools:src="@mipmap/ic_launcher" />
+        <TextView
+            android:id="@+id/movie_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/titlebgColor"
+            android:gravity="left"
+            android:padding="10dp"
+            android:textColor="@color/titletextColor"
+            android:textSize="56sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_margin="@dimen/activity_horizontal_margin">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/movie_releasedt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="34sp" />
-            <TextView
-                android:id="@+id/movie_runtime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="24sp" />
+            <ImageView
+                android:id="@+id/movie_img"
+                android:layout_width="150dp"
+                android:layout_height="200dp"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                tools:src="@mipmap/ic_launcher" />
 
-            <TextView
-                android:id="@+id/rating"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                tools:text="okkkk"/>
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/movie_releasedt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="34sp" />
+
+                <TextView
+                    android:id="@+id/movie_runtime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:textStyle="italic"
+                    tools:text="okkkk" />
+            </LinearLayout>
+
         </LinearLayout>
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/movie_overview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="16dp"
+            android:paddingBottom="16dp"
+            android:paddingRight="8dp"/>
 
-</LinearLayout>
+    </LinearLayout>
 </ScrollView>

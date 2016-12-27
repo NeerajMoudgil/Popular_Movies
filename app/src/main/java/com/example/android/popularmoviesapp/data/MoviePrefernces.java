@@ -46,4 +46,19 @@ public class MoviePrefernces {
         editor.commit();
     }
 
+    /**
+     * checks if the same prefernce is selected again in order to avoid same load again
+     * @param clickedPreference
+     * @return true if same prefernce selected again else false
+     */
+
+    public boolean checkSamePreferenceClick(String clickedPreference)
+    {
+        String currentPrefernce= getMoviePrfrnce();
+        if(currentPrefernce.equals(clickedPreference))
+            return true;
+        else
+            return false;
+
+    }
 }

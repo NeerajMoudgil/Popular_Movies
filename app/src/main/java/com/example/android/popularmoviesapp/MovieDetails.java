@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
      private TextView textViewReleaseDt;
      private TextView textViewTitle;
      private TextView textViewRating;
+     private TextView textViewOverview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +25,7 @@ import com.squareup.picasso.Picasso;
         textViewReleaseDt=(TextView)findViewById(R.id.movie_releasedt);
 
         textViewRating=(TextView)findViewById(R.id.rating);
+        textViewOverview=(TextView)findViewById(R.id.movie_overview);
 
         imageView=(ImageView)findViewById(R.id.movie_img);
 
@@ -31,7 +33,7 @@ import com.squareup.picasso.Picasso;
         String title=intent.getStringExtra("title");
         String releaseDate=intent.getStringExtra("releasedate");
         Long rating=intent.getLongExtra("rating",0);
-        //String runtime=intent.getStringExtra("title");
+        String overview=intent.getStringExtra("overview");
         String posterpath=intent.getStringExtra("posterpath");
 
         //Log.i("detailactivity",rating);
@@ -41,15 +43,20 @@ import com.squareup.picasso.Picasso;
         }
         if(releaseDate!=null)
         {
-            textViewReleaseDt.setText(releaseDate);
+            textViewReleaseDt.setText(releaseDate.substring(0,4));
         }
         if(rating!=null)
         {
-            textViewRating.setText(String.valueOf(rating));
+            textViewRating.setText(String.valueOf(rating)+"/10");
         }
         if(posterpath!=null)
         {
             Picasso.with(this).load(posterpath).into(imageView);
+
+        }
+        if(overview!=null)
+        {
+            textViewOverview.setText(overview);
 
         }
     }
