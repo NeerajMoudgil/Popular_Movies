@@ -9,6 +9,7 @@ public class MoviePrefernces {
     private SharedPreferences sharedPreferences;
     private final static String MYPREFERENCE="mypreference";
     private final static String MOVIESETTING="moviesetting";
+    private final static String FIRSTPREFERENCE="popular";
     private String moviefilter;
 
     /**
@@ -29,6 +30,11 @@ public class MoviePrefernces {
     public String getMoviePrfrnce(){
 
         moviefilter= sharedPreferences.getString(MOVIESETTING,null);
+        if(moviefilter==null)
+        {
+            moviefilter=FIRSTPREFERENCE;
+            setMoviePrfrnce(FIRSTPREFERENCE);
+        }
         return moviefilter;
     }
 

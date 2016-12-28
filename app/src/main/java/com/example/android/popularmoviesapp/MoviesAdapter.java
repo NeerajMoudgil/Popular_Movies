@@ -21,42 +21,13 @@ import java.util.ArrayList;
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
 
 
-
+    private final MoviesOnClickHandler mClickHandler;
     private ArrayList<Movie> movieArrList;
     private Context mcontext;
 
-    private final MoviesOnClickHandler mClickHandler;
-
-
-    /**
-     * The interface that provides onclick.
-     */
-    public interface MoviesOnClickHandler {
-        void onClick(Movie movie);
-    }
 
     public MoviesAdapter(MoviesOnClickHandler clickHandler) {
         mClickHandler = clickHandler;
-    }
-    public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public final ImageView mImageView;
-
-        public MoviesAdapterViewHolder(View itemView) {
-            super(itemView);
-            mImageView=(ImageView) itemView.findViewById(R.id.movie_poster);
-            itemView.setOnClickListener(this);
-
-
-        }
-
-        @Override
-        public void onClick(View view) {
-
-            int adapterPosition = getAdapterPosition();
-            Log.d("adapter posnn",String.valueOf(adapterPosition));
-            Movie movieclicked=movieArrList.get(adapterPosition);
-            mClickHandler.onClick(movieclicked);
-        }
     }
 
     @Override
@@ -67,38 +38,61 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         boolean shouldAttachToParentImmediately = false;
 
         View view = inflater.inflate(layoutIdForListItem, parent, shouldAttachToParentImmediately);
-        mcontext=view.getContext();
-        return new MoviesAdapterViewHolder(view);    }
+        mcontext = view.getContext();
+        return new MoviesAdapterViewHolder(view);
+    }
 
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
         Movie movie = movieArrList.get(position);
-        URL posterPath= movie.getPosterPath();
+        URL posterPath = movie.getPosterPath();
         Picasso.with(mcontext).load(posterPath.toString()).into(holder.mImageView);
-
-       // holder.mImageView.setImageResource(movie.getPosterPath());
-
 
     }
 
     @Override
     public int getItemCount() {
-        if(movieArrList==null) {
+        if (movieArrList == null) {
             return 0;
-        }else
-        {
+        } else {
             return movieArrList.size();
         }
     }
 
     /**
-     * sets the arraylist to list of new movies
      * @param moviesList new movie list to be displayed
      */
-    public void setMoviesData(ArrayList<Movie> moviesList)
-    {
-        movieArrList=moviesList;
+    public void setMoviesData(ArrayList<Movie> moviesList) {
+        movieArrList = moviesList;
         notifyDataSetChanged();
 
+    }
+
+    /**
+     * The interface that provides onclick.
+     */
+    public interface MoviesOnClickHandler {
+        void onClick(Movie movie);
+    }
+
+    public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public final ImageView mImageView;
+
+        public MoviesAdapterViewHolder(View itemView) {
+            super(itemView);
+            mImageView = (ImageView) itemView.findViewById(R.id.movie_poster);
+            itemView.setOnClickListener(this);
+
+
+        }
+
+        @Override
+        public void onClick(View view) {
+
+            int adapterPosition = getAdapterPosition();
+            Log.d("adapter posnn", String.valueOf(adapterPosition));
+            Movie movieclicked = movieArrList.get(adapterPosition);
+            mClickHandler.onClick(movieclicked);
+        }
     }
 }

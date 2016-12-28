@@ -99,6 +99,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     }
 
     @Override
+    protected void onPause() {
+        Log.i("onpause","onpause");
+        super.onPause();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.i("Maniactivity","on save instance called");
         outState.putParcelableArrayList("movies",movieArrayList);
