@@ -1,9 +1,14 @@
 package com.example.android.popularmoviesapp.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.example.android.popularmoviesapp.utilities.NetworkUtils;
+
 import java.net.URL;
 
 
-public class Movie {
+public class Movie implements Parcelable{
     private String title ;
     private long rating ;
     private long popularity;
@@ -29,6 +34,46 @@ public class Movie {
         this.overview = overview;
         this.releaseDate = releaseDate;
         this.posterPath = posterPath;
+    }
+
+    protected Movie(Parcel in) {
+        title = in.readString();
+        rating = in.readLong();
+        popularity = in.readLong();
+        overview = in.readString();
+        releaseDate = in.readString();
+        posterPath= NetworkUtils.buildImageURL(in.readString());
+    }
+
+
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(title);
+        parcel.writeLong(rating);
+        parcel.writeLong(popularity);
+        parcel.writeString(overview);
+        parcel.writeString(releaseDate);
+        parcel.writeString(posterPath.toString());
+
+
     }
 
     /**
@@ -82,6 +127,7 @@ public class Movie {
     public void setPosterPath(URL posterPath) {
         this.posterPath = posterPath;
     }
+
 
 
 }

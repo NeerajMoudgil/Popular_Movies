@@ -37,7 +37,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private ProgressBar mLoadingIndicator;
     private MoviesAdapter moviesAdapter;
+     private ArrayList<Movie> movieArrayList;
     public static String APIKEY;
+
+
 
     /**
      * creates the activity first screen that will appear on launch
@@ -50,39 +53,61 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
-        APIKEY=getString(R.string.movieAPIKEY);
-        moviesAdapter=new MoviesAdapter(this);
+        APIKEY = getString(R.string.movieAPIKEY);
+        moviesAdapter = new MoviesAdapter(this);
 
-        movieprefernce=new MoviePrefernces(this);
+        movieprefernce = new MoviePrefernces(this);
 
-        mRecyclerView=(RecyclerView)findViewById(R.id.recyclerview_movies);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_movies);
         mRecyclerView.setAdapter(moviesAdapter);
 
         GridLayoutManager layoutManager
-                = new GridLayoutManager(this,2);
+                = new GridLayoutManager(this, 2);
 
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
 
+        mErrorMessageView = (TextView) findViewById(R.id.error_msg);
 
-        mErrorMessageView=(TextView) findViewById(R.id.error_msg);
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
 
-        mLoadingIndicator=(ProgressBar) findViewById(R.id.loading_indicator);
+        if(savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
+            String menuItemSelected = movieprefernce.getMoviePrfrnce();
+            new FetchMoviesDataTask().execute(menuItemSelected);
+        }else
 
-        String menuItemSelected=movieprefernce.getMoviePrfrnce();
-        new FetchMoviesDataTask().execute(menuItemSelected);
+        {
+            movieArrayList=savedInstanceState.getParcelableArrayList("movies");
+            if(movieArrayList!=null) {
+                if (movieArrayList.size() == 0) {
+                    String menuItemSelected = movieprefernce.getMoviePrfrnce();
+                    new FetchMoviesDataTask().execute(menuItemSelected);
+                }else {
+                    moviesAdapter.setMoviesData(movieArrayList);
 
+                }
+            }
+        }
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.i("Maniactivity","on save instance called");
+        Log.i("Maniactivit sizey",String.valueOf(movieArrayList.size()));
+        outState.putParcelableArrayList("movies",movieArrayList);
+        super.onSaveInstanceState(outState);
     }
 
     /**
      * shows error view if fail to fetch movies
      * hides view that will show movies
      */
+
+
 
     private void showMoviesData()
     {
@@ -157,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                         .getResponseFromHttpUrl(movieUrl);
 
                 Log.v("MainActivity got json",jsonMovies);
-                ArrayList<Movie> movieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
+                 movieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
 
 
                 return movieArrayList;
