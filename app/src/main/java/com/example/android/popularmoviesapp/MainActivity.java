@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         {
             movieArrayList=savedInstanceState.getParcelableArrayList("movies");
             if(movieArrayList!=null) {
+                showMoviesData();
                 if (movieArrayList.size() == 0) {
                     String menuItemSelected = movieprefernce.getMoviePrfrnce();
                     new FetchMoviesDataTask().execute(menuItemSelected);
@@ -89,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                     moviesAdapter.setMoviesData(movieArrayList);
 
                 }
+            }else
+            {
+                showErrorView();
             }
         }
 
@@ -97,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.i("Maniactivity","on save instance called");
-        Log.i("Maniactivit sizey",String.valueOf(movieArrayList.size()));
         outState.putParcelableArrayList("movies",movieArrayList);
         super.onSaveInstanceState(outState);
     }
@@ -301,6 +304,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         Boolean samePreference = movieprefernce.checkSamePreferenceClick(preference);
         if(!samePreference || errorVisible)
         {
+            movieArrayList=null;
             moviesAdapter.setMoviesData(null);
             new FetchMoviesDataTask().execute(preference);
             movieprefernce.setMoviePrfrnce(preference);
@@ -315,6 +319,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         Boolean samePreference = movieprefernce.checkSamePreferenceClick(preference);
         if(!samePreference || errorVisible)
         {
+            movieArrayList=null;
             moviesAdapter.setMoviesData(null);
             new FetchMoviesDataTask().execute(preference);
             movieprefernce.setMoviePrfrnce(preference);
