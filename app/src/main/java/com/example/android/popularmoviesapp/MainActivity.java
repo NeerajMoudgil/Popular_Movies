@@ -3,8 +3,10 @@ package com.example.android.popularmoviesapp;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,16 +26,19 @@ import com.example.android.popularmoviesapp.utilities.NetworkUtils;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler, LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
 
 
     private final static String PREFERENCEONE="popular";
     private final static String PREFERENCETWO="top_rated";
+    private final static int LOADER_ID=0;
     private MoviePrefernces movieprefernce;
     private RecyclerView mRecyclerView;
 
 
     private TextView mErrorMessageView;
+
+    private LoaderManager loaderManager;
 
     private ProgressBar mLoadingIndicator;
     private MoviesAdapter moviesAdapter;
@@ -46,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
      * creates the activity first screen that will appear on launch
      * initialize reference to all the views in main activity layout to refer later in the code
      * assigns GridLayoutManager to recyclerview with 2 cloumns
-     * executes the FetchMoviesDataTask (defined below) to perform async task to get response in background
      * @param savedInstanceState
      */
     @Override
@@ -74,27 +78,17 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
 
-        if(savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
-            String menuItemSelected = movieprefernce.getMoviePrfrnce();
-            new FetchMoviesDataTask().execute(menuItemSelected);
-        }else
+        LoaderManager.LoaderCallbacks<ArrayList<Movie>> callback= MainActivity.this;
 
-        {
-            movieArrayList=savedInstanceState.getParcelableArrayList("movies");
-            if(movieArrayList!=null) {
-                showMoviesData();
-                if (movieArrayList.size() == 0) {
-                    String menuItemSelected = movieprefernce.getMoviePrfrnce();
-                    new FetchMoviesDataTask().execute(menuItemSelected);
-                }else {
-                    moviesAdapter.setMoviesData(movieArrayList);
+        Bundle bundleForLoader=null;
+        /**
+         * loader manager saves the state so no need of saveinstancestate
+         */
 
-                }
-            }else
-            {
-                showErrorView();
-            }
-        }
+        loaderManager=getSupportLoaderManager();
+
+        loaderManager.initLoader(LOADER_ID, bundleForLoader, callback);
+
 
     }
 
@@ -104,12 +98,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         super.onPause();
     }
 
-    @Override
+  /*  @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.i("Maniactivity","on save instance called");
         outState.putParcelableArrayList("movies",movieArrayList);
         super.onSaveInstanceState(outState);
-    }
+    }*/
 
     /**
      * shows error view if fail to fetch movies
@@ -156,65 +150,80 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         startActivity(intent);
     }
 
-    /**
-     * class defined that will perform background task to fetch data from themovie API
-     * on getting the data sets data to adapter
-     */
+    @Override
+    public Loader<ArrayList<Movie>> onCreateLoader(int id, Bundle args) {
+            return new AsyncTaskLoader<ArrayList<Movie>>(MainActivity.this) {
+                ArrayList<Movie> lmovieArrayList=null;
 
-    public class FetchMoviesDataTask extends AsyncTask<String, Void,  ArrayList<Movie>> {
+                @Override
+                protected void onStartLoading() {
+
+                    if(lmovieArrayList==null)
+                    {
+                        mLoadingIndicator.setVisibility(View.VISIBLE);
+
+                        forceLoad();;
+                    }else
+                    {
+                        deliverResult(lmovieArrayList);
+                    }
+                }
+
+                @Override
+                public void deliverResult(ArrayList<Movie> data) {
+                    lmovieArrayList=data;
+                    super.deliverResult(data);
+                }
+
+                @Override
+                public ArrayList<Movie> loadInBackground() {
+
+                    String prefernce = movieprefernce.getMoviePrfrnce();
+                    URL movieUrl = NetworkUtils.buildApiUrl(prefernce,MainActivity.APIKEY);
+                    Boolean isonline=isOnline();
+                    Log.d("isOnline",String.valueOf(isonline));
+                    if(!isOnline()) {
+                        return null;
+                    }
+
+                    try {
+                        String jsonMovies = NetworkUtils
+                                .getResponseFromHttpUrl(movieUrl);
+
+                        Log.v("MainActivity got json",jsonMovies);
+                        lmovieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
 
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
+                        return lmovieArrayList;
 
-        @Override
-        protected  ArrayList<Movie> doInBackground(String... params) {
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            };
+    }
 
-
-            if (params.length == 0) {
-                return null;
-            }
-
-            String prefernce = params[0];
-            URL movieUrl = NetworkUtils.buildApiUrl(prefernce,MainActivity.APIKEY);
-            Boolean isonline=isOnline();
-            Log.d("isOnline",String.valueOf(isonline));
-            if(!isOnline()) {
-                return null;
-            }
-
-            try {
-                String jsonMovies = NetworkUtils
-                        .getResponseFromHttpUrl(movieUrl);
-
-                Log.v("MainActivity got json",jsonMovies);
-                 movieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
-
-
-                return movieArrayList;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-
-        }
-
-        @Override
-        protected void onPostExecute( ArrayList<Movie> movieArrayList) {
-
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (movieArrayList != null) {
-                showMoviesData();
-                moviesAdapter.setMoviesData(movieArrayList);
-            } else {
-                showErrorView();
-            }
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> data) {
+        movieArrayList=data;
+        moviesAdapter.setMoviesData(data);
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        if (movieArrayList != null) {
+            showMoviesData();
+        } else {
+            showErrorView();
         }
     }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
+
+    }
+
+
+
+
 
     /**
      * checks the connectivity
@@ -312,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         {
             movieArrayList=null;
             moviesAdapter.setMoviesData(null);
-            new FetchMoviesDataTask().execute(preference);
+            loaderManager.restartLoader(LOADER_ID,null,MainActivity.this);
             movieprefernce.setMoviePrfrnce(preference);
 
         }
@@ -327,7 +336,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         {
             movieArrayList=null;
             moviesAdapter.setMoviesData(null);
-            new FetchMoviesDataTask().execute(preference);
+            /**
+             * restarts loader from begining and discards current loader
+             */
+            loaderManager.restartLoader(LOADER_ID,null,MainActivity.this);
+
+
             movieprefernce.setMoviePrfrnce(preference);
         }
 
