@@ -170,6 +170,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 }
 
                 @Override
+                protected void onForceLoad() {
+                    super.onForceLoad();
+                }
+
+                @Override
                 public void deliverResult(ArrayList<Movie> data) {
                     lmovieArrayList=data;
                     super.deliverResult(data);
