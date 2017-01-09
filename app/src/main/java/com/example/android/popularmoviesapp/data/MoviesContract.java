@@ -27,7 +27,7 @@ public class MoviesContract {
         public static final String COLUMN_SYNOPSIS="synopsis";
         public static final String COLUMN_USERRATING="userrating";
         public static final String COLUMN_RELEASEDATE="releasedate";
-        public static final String COLUMN_FAVOURITE="releasedate";
+        public static final String COLUMN_FAVOURITE="favourite";
 
 
         public static Uri buildWeatherUriWithId(long id) {

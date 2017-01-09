@@ -118,7 +118,7 @@ public class MoviesProvider extends ContentProvider {
                 } finally {
                     db.endTransaction();
                 }
-
+                    Log.i("MOVIES inserted",String.valueOf(rowsInserted));
                 if (rowsInserted > 0) {
                     getContext().getContentResolver().notifyChange(uri, null);
                 }

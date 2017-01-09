@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.example.android.popularmoviesapp.data.Movie;
 import com.example.android.popularmoviesapp.data.MoviePrefernces;
+import com.example.android.popularmoviesapp.data.MoviesContract;
 import com.example.android.popularmoviesapp.utilities.MovieJSONUtils;
 import com.example.android.popularmoviesapp.utilities.NetworkUtils;
 
@@ -197,6 +198,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
                         Log.v("MainActivity got json",jsonMovies);
                         lmovieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
+
+                        //Testing insert
+                        getContext().getContentResolver().bulkInsert(MoviesContract.MoviesEntry.CONTENT_URI,MovieJSONUtils.contentValuesarr);
+
 
 
                         return lmovieArrayList;
