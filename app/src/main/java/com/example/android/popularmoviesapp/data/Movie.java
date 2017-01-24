@@ -17,6 +17,8 @@ public class Movie implements Parcelable{
 
     private URL posterPath;
 
+    private long movieId;
+
     /**
      * constructor Creates movie object
      * @param title
@@ -27,13 +29,14 @@ public class Movie implements Parcelable{
      * @param posterPath
      */
 
-    public Movie(String title, long rating, long popularity, String overview, String releaseDate, URL posterPath) {
+    public Movie(String title, long rating, long popularity, String overview, String releaseDate, URL posterPath,long movieId) {
         this.title = title;
         this.rating = rating;
         this.popularity = popularity;
         this.overview = overview;
         this.releaseDate = releaseDate;
         this.posterPath = posterPath;
+        this.movieId = movieId;
     }
 
     protected Movie(Parcel in) {
@@ -42,6 +45,7 @@ public class Movie implements Parcelable{
         popularity = in.readLong();
         overview = in.readString();
         releaseDate = in.readString();
+        movieId=in.readLong();
         posterPath= NetworkUtils.buildImageURL(in.readString());
     }
 
@@ -71,6 +75,7 @@ public class Movie implements Parcelable{
         parcel.writeLong(popularity);
         parcel.writeString(overview);
         parcel.writeString(releaseDate);
+        parcel.writeLong(movieId);
         parcel.writeString(posterPath.toString());
 
 
@@ -126,6 +131,14 @@ public class Movie implements Parcelable{
 
     public void setPosterPath(URL posterPath) {
         this.posterPath = posterPath;
+    }
+
+    public long getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(long movieId) {
+        this.movieId = movieId;
     }
 
 

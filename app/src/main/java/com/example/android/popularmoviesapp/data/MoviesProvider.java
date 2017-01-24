@@ -117,6 +117,7 @@ public class MoviesProvider extends ContentProvider {
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
+
                 }
                     Log.i("MOVIES inserted",String.valueOf(rowsInserted));
                 if (rowsInserted > 0) {

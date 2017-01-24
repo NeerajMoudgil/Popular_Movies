@@ -16,6 +16,11 @@
             android:title="@string/toprated_movies"
             android:orderInCategory="2"
             android:checked="false"/>
+        <item
+            android:id="@+id/favourite_action"
+            android:title="@string/favourite_movies"
+            android:orderInCategory="2"
+            android:checked="false"/>
     </group>
 
 

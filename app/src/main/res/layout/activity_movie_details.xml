@@ -64,6 +64,7 @@
 
         </LinearLayout>
 
+
         <TextView
             android:id="@+id/movie_overview"
             android:layout_width="wrap_content"
@@ -79,7 +80,36 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="8dp"
             />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/movie_trailers"
+            android:textSize="24sp"
+            android:padding="16dp"
+            />
 
+
+        <ListView
+            android:id="@+id/trailersListview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            ></ListView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/movie_reviews"
+            android:textSize="24sp"
+            android:padding="16dp"
+            />
+        <ListView
+            android:id="@+id/reviewsListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></ListView>
 
     </LinearLayout>
+
+
 </ScrollView>

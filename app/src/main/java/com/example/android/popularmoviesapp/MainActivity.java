@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import com.example.android.popularmoviesapp.data.Movie;
 import com.example.android.popularmoviesapp.data.MoviePrefernces;
-import com.example.android.popularmoviesapp.data.MoviesContract;
 import com.example.android.popularmoviesapp.utilities.MovieJSONUtils;
 import com.example.android.popularmoviesapp.utilities.NetworkUtils;
 
@@ -148,6 +147,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         intent.putExtra("overview",movie.getOverview());
         intent.putExtra("releasedate",movie.getReleaseDate());
         intent.putExtra("posterpath",movie.getPosterPath().toString());
+        intent.putExtra("movieID",movie.getMovieId());
+        Log.i("mainactivity mivuie id",String.valueOf(movie.getMovieId()));
         startActivity(intent);
     }
 
@@ -199,8 +200,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                         Log.v("MainActivity got json",jsonMovies);
                         lmovieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
 
-                        //Testing insert
-                        getContext().getContentResolver().bulkInsert(MoviesContract.MoviesEntry.CONTENT_URI,MovieJSONUtils.contentValuesarr);
+
 
 
 
@@ -311,6 +311,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 return true;
             case R.id.popular_action:
                 loadPopularMovies(PREFERENCEONE);
+                return true;
+            case R.id.favourite_action:
+                //yet to write here for favourite
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

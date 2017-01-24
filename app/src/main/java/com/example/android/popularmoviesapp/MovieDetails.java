@@ -3,17 +3,30 @@
  import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.android.popularmoviesapp.data.TrailerReview;
+import com.example.android.popularmoviesapp.utilities.NetworkUtils;
+import com.example.android.popularmoviesapp.utilities.TrailerReviewJSONUtils;
 import com.squareup.picasso.Picasso;
 
- public class MovieDetails extends AppCompatActivity {
+import java.net.URL;
+import java.util.ArrayList;
+
+ public class MovieDetails extends AppCompatActivity implements  NetworkUtils.onResponseHandler{
     private ImageView imageView;
      private TextView textViewReleaseDt;
      private TextView textViewTitle;
      private TextView textViewRating;
      private TextView textViewOverview;
+     private ListView listViewTrailers;
+     private ListView listViewReviews;
+
+     private TrailerReviewAdapter trailerReviewAdapter;
+     private long movieId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +42,14 @@ import com.squareup.picasso.Picasso;
 
         imageView=(ImageView)findViewById(R.id.movie_img);
 
+         trailerReviewAdapter=new TrailerReviewAdapter(this,0,null);
+        listViewTrailers= (ListView)findViewById(R.id.trailersListview);
+
+        listViewTrailers.setAdapter(trailerReviewAdapter);
+
+        listViewReviews= (ListView)findViewById(R.id.reviewsListView);
+
+
         Intent intent=getIntent();
         String title=intent.getStringExtra("title");
         String releaseDate=intent.getStringExtra("releasedate");
@@ -37,6 +58,13 @@ import com.squareup.picasso.Picasso;
         String posterpath=intent.getStringExtra("posterpath");
 
         //Log.i("detailactivity",rating);
+        if(intent.hasExtra("movieID"))
+        {
+            movieId=intent.getLongExtra("movieID",0);
+            URL reviewtrailerURL=NetworkUtils.buildReviewTrailerURL(movieId,MainActivity.APIKEY );
+            NetworkUtils.getResponseUsingVolley(reviewtrailerURL.toString(),this);
+            Log.i("MovieId",String.valueOf(movieId));
+        }
         if(title!=null)
         {
             textViewTitle.setText(title);
@@ -60,4 +88,12 @@ import com.squareup.picasso.Picasso;
 
         }
     }
-}
+
+     @Override
+     public void onResponse(String response) {
+
+         ArrayList<TrailerReview> trailerlist=TrailerReviewJSONUtils.getTrailersFromJSON(response);
+         trailerReviewAdapter.setTrailerlist(trailerlist);
+
+     }
+ }
