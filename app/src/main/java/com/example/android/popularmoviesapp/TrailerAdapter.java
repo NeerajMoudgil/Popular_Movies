@@ -10,18 +10,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.popularmoviesapp.data.TrailerReview;
 
 import java.util.ArrayList;
 
-public class TrailerReviewAdapter extends ArrayAdapter<TrailerReview> {
+public class TrailerAdapter extends ArrayAdapter<TrailerReview> {
 
-   private ArrayList<TrailerReview> trailerlist=null;
+    private ArrayList<TrailerReview> trailerlist=null;
 
 
-    public TrailerReviewAdapter(Context context, int resource, ArrayList<TrailerReview> trailerlist) {
+    public TrailerAdapter(Context context, int resource, ArrayList<TrailerReview> trailerlist) {
         super(context, resource,trailerlist);
     }
 
@@ -29,7 +30,7 @@ public class TrailerReviewAdapter extends ArrayAdapter<TrailerReview> {
     @Override
     public int getCount() {
         if(trailerlist!=null)
-        return trailerlist.size();
+            return trailerlist.size();
         else
             return 0;
     }
@@ -52,11 +53,25 @@ public class TrailerReviewAdapter extends ArrayAdapter<TrailerReview> {
         TrailerReview trailerReview =getItem(position);
 
 
-            Log.i("TRIALER EVIEW DETAIL", trailerReview.getTrailename());
+        Log.i("TRIALER EVIEW DETAIL", trailerReview.getTrailename());
         TextView trailernameTextView = (TextView) listItemView.findViewById(R.id.trailerName);
         ImageView shareImageView = (ImageView) listItemView.findViewById(R.id.sharebutton);
 
-       // shareImageView.setOnClickListener();
+
+        shareImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                RelativeLayout relativeLayout=(RelativeLayout) view.getParent();
+                TextView trailerText= (TextView)relativeLayout.getChildAt(1);
+                String trailerName= trailerText.getText().toString();
+                String trailerUrl= gettrailerURLfromName(trailerName);
+                Log.i("trailerUrl",trailerUrl);
+
+                MovieDetails movieDetail=(MovieDetails) getContext();
+                movieDetail.shareTrailer(trailerUrl);
+
+            }
+        });
 
         trailernameTextView.setText(trailerReview.getTrailename());
 
@@ -72,6 +87,27 @@ public class TrailerReviewAdapter extends ArrayAdapter<TrailerReview> {
         trailerlist=trailerreviewlist;
         notifyDataSetChanged();
     }
+
+    public String gettrailerURLfromName(String trailerName)
+    {
+        String trailerUrl="";
+        if(trailerlist!=null)
+        {
+            for(int iter=0;iter<trailerlist.size();iter++)
+            {
+                TrailerReview trailerReview=trailerlist.get(iter);
+                if(trailerReview.getTrailename().equals(trailerName))
+                {
+                    trailerUrl=trailerReview.getTrailerurl();
+                    break;
+                }
+            }
+        }
+        return trailerUrl;
+
+    }
+
+
 
 
 }

@@ -1,20 +1,23 @@
  package com.example.android.popularmoviesapp;
 
  import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
+ import android.net.Uri;
+ import android.os.Bundle;
+ import android.support.v7.app.AppCompatActivity;
+ import android.util.Log;
+ import android.view.View;
+ import android.widget.AdapterView;
+ import android.widget.ImageView;
+ import android.widget.ListView;
+ import android.widget.TextView;
 
-import com.example.android.popularmoviesapp.data.TrailerReview;
-import com.example.android.popularmoviesapp.utilities.NetworkUtils;
-import com.example.android.popularmoviesapp.utilities.TrailerReviewJSONUtils;
-import com.squareup.picasso.Picasso;
+ import com.example.android.popularmoviesapp.data.TrailerReview;
+ import com.example.android.popularmoviesapp.utilities.NetworkUtils;
+ import com.example.android.popularmoviesapp.utilities.TrailerReviewJSONUtils;
+ import com.squareup.picasso.Picasso;
 
-import java.net.URL;
-import java.util.ArrayList;
+ import java.net.URL;
+ import java.util.ArrayList;
 
  public class MovieDetails extends AppCompatActivity implements  NetworkUtils.onResponseHandler{
     private ImageView imageView;
@@ -25,7 +28,8 @@ import java.util.ArrayList;
      private ListView listViewTrailers;
      private ListView listViewReviews;
 
-     private TrailerReviewAdapter trailerReviewAdapter;
+     private TrailerAdapter trailerAdapter;
+     private ReviewAdapter reviewAdapter;
      private long movieId;
 
     @Override
@@ -42,13 +46,27 @@ import java.util.ArrayList;
 
         imageView=(ImageView)findViewById(R.id.movie_img);
 
-         trailerReviewAdapter=new TrailerReviewAdapter(this,0,null);
+        trailerAdapter=new TrailerAdapter(this,0,null);
+        reviewAdapter=new ReviewAdapter(this,0,null);
+
+
+
         listViewTrailers= (ListView)findViewById(R.id.trailersListview);
 
-        listViewTrailers.setAdapter(trailerReviewAdapter);
+        listViewTrailers.setAdapter(trailerAdapter);
+
+        listViewTrailers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int iposition, long l) {
+                TrailerReview trailer=(TrailerReview)adapterView.getItemAtPosition(iposition);
+                Log.i("trailerGotonclick",trailer.getTrailerurl());
+                runTrailer(trailer.getTrailerurl());
+
+            }
+        });
 
         listViewReviews= (ListView)findViewById(R.id.reviewsListView);
-
+        listViewReviews.setAdapter(reviewAdapter);
 
         Intent intent=getIntent();
         String title=intent.getStringExtra("title");
@@ -57,13 +75,14 @@ import java.util.ArrayList;
         String overview=intent.getStringExtra("overview");
         String posterpath=intent.getStringExtra("posterpath");
 
-        //Log.i("detailactivity",rating);
+
         if(intent.hasExtra("movieID"))
         {
             movieId=intent.getLongExtra("movieID",0);
             URL reviewtrailerURL=NetworkUtils.buildReviewTrailerURL(movieId,MainActivity.APIKEY );
             NetworkUtils.getResponseUsingVolley(reviewtrailerURL.toString(),this);
             Log.i("MovieId",String.valueOf(movieId));
+
         }
         if(title!=null)
         {
@@ -93,7 +112,24 @@ import java.util.ArrayList;
      public void onResponse(String response) {
 
          ArrayList<TrailerReview> trailerlist=TrailerReviewJSONUtils.getTrailersFromJSON(response);
-         trailerReviewAdapter.setTrailerlist(trailerlist);
+         trailerAdapter.setTrailerlist(trailerlist);
+         ArrayList<TrailerReview> reviewlist=TrailerReviewJSONUtils.getReviewsFromJSON(response);
+         reviewAdapter.setReviewlist(reviewlist);
 
+     }
+
+     public void runTrailer(String url)
+     {
+         Intent videoIntent= (new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+         startActivity(videoIntent);
+
+     }
+
+     public void  shareTrailer(String url){
+         Intent sendIntent = new Intent();
+         sendIntent.setAction(Intent.ACTION_SEND);
+         sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+         sendIntent.setType("text/plain");
+         startActivity(sendIntent);
      }
  }

@@ -16,7 +16,9 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         tools:text="dummy"
-        android:textSize="24sp"/>
+        android:textSize="24sp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"/>
     <ImageView
         android:id="@+id/sharebutton"
         android:layout_alignParentRight="true"
@@ -25,6 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
+        android:focusable="false"
 
         android:src="@android:drawable/ic_menu_share"/>
 
