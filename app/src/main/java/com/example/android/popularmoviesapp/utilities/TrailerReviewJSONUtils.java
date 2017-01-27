@@ -1,6 +1,8 @@
 package com.example.android.popularmoviesapp.utilities;
 
 
+import android.util.Log;
+
 import com.example.android.popularmoviesapp.data.TrailerReview;
 
 import org.json.JSONArray;
@@ -26,6 +28,7 @@ public class TrailerReviewJSONUtils {
 
     public static ArrayList<TrailerReview> getTrailersFromJSON(String response)
     {
+        Log.i("respnse",response);
         trailerlist = new ArrayList<TrailerReview>();
 
         try {

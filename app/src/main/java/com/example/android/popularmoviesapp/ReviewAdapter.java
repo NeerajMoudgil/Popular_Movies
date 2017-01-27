@@ -33,7 +33,10 @@ public class ReviewAdapter extends ArrayAdapter<TrailerReview> {
         if(reviewlist!=null)
             return reviewlist.size();
         else
+
             return 0;
+
+
     }
 
     @Nullable

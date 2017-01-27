@@ -68,6 +68,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     }
 
+
+
     /**
      * The interface that provides onclick.
      */

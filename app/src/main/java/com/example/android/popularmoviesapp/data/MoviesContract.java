@@ -27,10 +27,12 @@ public class MoviesContract {
         public static final String COLUMN_SYNOPSIS="synopsis";
         public static final String COLUMN_USERRATING="userrating";
         public static final String COLUMN_RELEASEDATE="releasedate";
+        //column to be used if store all data in future, update
         public static final String COLUMN_FAVOURITE="favourite";
+        public static final String COLUMN_MOVIEID="movieid";
 
 
-        public static Uri buildWeatherUriWithId(long id) {
+        public static Uri buildMovieUriWithId(long id) {
             return CONTENT_URI.buildUpon()
                     .appendPath(Long.toString(id))
                     .build();

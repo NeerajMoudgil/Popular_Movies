@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/movie_poster"
     android:layout_width="match_parent"
@@ -6,3 +10,14 @@
     android:adjustViewBounds="true"
     android:scaleType="centerCrop"
      />
+    <TextView
+        android:id="@+id/noposter_tittle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textSize="24sp"
+        android:visibility="gone"
+
+        />
+</LinearLayout>

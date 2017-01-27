@@ -1,8 +1,7 @@
 package com.example.android.popularmoviesapp;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -20,18 +19,20 @@ import android.widget.TextView;
 
 import com.example.android.popularmoviesapp.data.Movie;
 import com.example.android.popularmoviesapp.data.MoviePrefernces;
+import com.example.android.popularmoviesapp.data.MoviesContract;
 import com.example.android.popularmoviesapp.utilities.MovieJSONUtils;
 import com.example.android.popularmoviesapp.utilities.NetworkUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler, LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler, NetworkUtils.onResponseHandler, LoaderManager.LoaderCallbacks<Cursor> {
 
 
-    private final static String PREFERENCEONE="popular";
-    private final static String PREFERENCETWO="top_rated";
-    private final static int LOADER_ID=0;
+    private final static String PREFERENCEONE = "popular";
+    private final static String PREFERENCETWO = "top_rated";
+    private final static String FAVORITEMOVIES = "favorite";
+    private final static int LOADER_ID = 0;
     private MoviePrefernces movieprefernce;
     private RecyclerView mRecyclerView;
 
@@ -42,15 +43,16 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private ProgressBar mLoadingIndicator;
     private MoviesAdapter moviesAdapter;
-     private ArrayList<Movie> movieArrayList;
+    private MoviesCursorAdapter moviesCursorAdapter;
+    private ArrayList<Movie> movieArrayList;
     public static String APIKEY;
-
 
 
     /**
      * creates the activity first screen that will appear on launch
      * initialize reference to all the views in main activity layout to refer later in the code
      * assigns GridLayoutManager to recyclerview with 2 cloumns
+     *
      * @param savedInstanceState
      */
     @Override
@@ -61,10 +63,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         APIKEY = getString(R.string.movieAPIKEY);
         moviesAdapter = new MoviesAdapter(this);
+        moviesCursorAdapter = new MoviesCursorAdapter(this);
 
         movieprefernce = new MoviePrefernces(this);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_movies);
+
         mRecyclerView.setAdapter(moviesAdapter);
 
         GridLayoutManager layoutManager
@@ -78,183 +82,244 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
 
-        LoaderManager.LoaderCallbacks<ArrayList<Movie>> callback= MainActivity.this;
 
-        Bundle bundleForLoader=null;
-        /**
-         * loader manager saves the state so no need of saveinstancestate
-         */
+        if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
+            Log.i("savestate", "null");
+            String prefernce = movieprefernce.getMoviePrfrnce();
+            if (prefernce.equals(FAVORITEMOVIES)) {
+                mRecyclerView.setAdapter(moviesCursorAdapter);
+                getSupportLoaderManager().initLoader(LOADER_ID, null, MainActivity.this);
+            } else {
+                URL movieUrl = NetworkUtils.buildApiUrl(prefernce, MainActivity.APIKEY);
 
-        loaderManager=getSupportLoaderManager();
+                loadMoviesData(movieUrl.toString());
+            }
+        } else {
+            Log.i("savestate", "Notnull");
+            movieArrayList = savedInstanceState.getParcelableArrayList("movies");
+            if (movieArrayList != null) {
+                if (movieArrayList.size() == 0) {
+                    String prefernce = movieprefernce.getMoviePrfrnce();
 
-        loaderManager.initLoader(LOADER_ID, bundleForLoader, callback);
+                    if (prefernce.equals(FAVORITEMOVIES)) {
+                        mRecyclerView.setAdapter(moviesCursorAdapter);
+                       getSupportLoaderManager().initLoader(LOADER_ID, null, MainActivity.this);
+
+                    } else {
+
+                        URL movieUrl = NetworkUtils.buildApiUrl(prefernce, MainActivity.APIKEY);
+
+                        loadMoviesData(movieUrl.toString());
+                    }
+
+                } else {
+                    moviesAdapter.setMoviesData(movieArrayList);
+                }
+            }
+
+        }
 
 
     }
 
     @Override
     protected void onPause() {
-        Log.i("onpause","onpause");
+        Log.i("onpause", "onpause");
         super.onPause();
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
-  /*  @Override
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.i("Maniactivity","on save instance called");
-        outState.putParcelableArrayList("movies",movieArrayList);
+        Log.i("Maniactivity", "on save instance called");
+        String prefernce = movieprefernce.getMoviePrfrnce();
+        // not required for cursor as already handled by loaderCallback
+        if (prefernce.equals(FAVORITEMOVIES)) {
+        return;
+        }
+        outState.putParcelableArrayList("movies", movieArrayList);
+
         super.onSaveInstanceState(outState);
-    }*/
+    }
 
     /**
-     * shows error view if fail to fetch movies
-     * hides view that will show movies
+     * makes a call to movie API
+     *
+     * @param movieURL api url to be called
      */
 
-
-
-    private void showMoviesData()
-    {
-        mErrorMessageView.setVisibility(View.INVISIBLE);
-
-        mRecyclerView.setVisibility(View.VISIBLE);
-
+    private void loadMoviesData(String movieURL) {
+        NetworkUtils.getResponseUsingVolley(movieURL, this);
     }
+
+    /**
+     * callback after getting response from making call to API
+     *
+     * @param response from request by volley to moviedb API
+     */
+
+    @Override
+    public void onResponse(String response) {
+        String msg=getString(R.string.noData);
+        try {
+
+            if (response == null) {
+                showErrorView(msg);
+            } else {
+                ArrayList<Movie> lmovieArrayList = MovieJSONUtils.getMoviesFromJSON(MainActivity.this, response);
+                movieArrayList = lmovieArrayList;
+                moviesAdapter.setMoviesData(lmovieArrayList);
+                mLoadingIndicator.setVisibility(View.INVISIBLE);
+                if (movieArrayList != null) {
+                    showMoviesData();
+                } else {
+                    showErrorView(msg);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorView(msg);
+
+        }
+    }
+
     /**
      * hides error view if fail to fetch movies
      * shows view when able to fetch movies
      */
 
-    private void showErrorView()
-    {
-        mRecyclerView.setVisibility(View.INVISIBLE);
+    private void showMoviesData() {
+        mErrorMessageView.setVisibility(View.INVISIBLE);
 
+        mRecyclerView.setVisibility(View.VISIBLE);
+
+    }
+
+
+    /**
+     * shows error view if fail to fetch movies
+     * hides view that will show movies
+     * @param message
+     */
+
+
+    private void showErrorView(String message) {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessageView.setText(message);
         mErrorMessageView.setVisibility(View.VISIBLE);
+      ;
     }
 
     /**
      * click event on each view of recyclerview
+     *
      * @param movie
      */
 
     @Override
     public void onClick(Movie movie) {
-        Log.d("MNIN MOv",movie.toString());
-        Intent intent =new Intent(MainActivity.this,MovieDetails.class);
-        intent.putExtra("title",movie.getTitle());
+        Log.d("MNIN MOv", movie.toString());
+        Intent intent = new Intent(MainActivity.this, MovieDetails.class);
+        intent.putExtra("title", movie.getTitle());
 
-        intent.putExtra("rating",movie.getRating());
-        intent.putExtra("popularity",movie.getPopularity());
-        intent.putExtra("overview",movie.getOverview());
-        intent.putExtra("releasedate",movie.getReleaseDate());
-        intent.putExtra("posterpath",movie.getPosterPath().toString());
-        intent.putExtra("movieID",movie.getMovieId());
-        Log.i("mainactivity mivuie id",String.valueOf(movie.getMovieId()));
+        intent.putExtra("rating", movie.getRating());
+        intent.putExtra("popularity", movie.getPopularity());
+        intent.putExtra("overview", movie.getOverview());
+        intent.putExtra("releasedate", movie.getReleaseDate());
+        intent.putExtra("posterpath", movie.getPosterPath().toString());
+        intent.putExtra("movieID", movie.getMovieId());
+        Log.i("mainactivity mivuie id", String.valueOf(movie.getMovieId()));
         startActivity(intent);
     }
 
+    /**
+     * getting data from local DB for favourite movies using contentProvider
+     */
     @Override
-    public Loader<ArrayList<Movie>> onCreateLoader(int id, Bundle args) {
-            return new AsyncTaskLoader<ArrayList<Movie>>(MainActivity.this) {
-                ArrayList<Movie> lmovieArrayList=null;
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new AsyncTaskLoader<Cursor>(MainActivity.this) {
+            Cursor mMovieData = null;
 
-                @Override
-                protected void onStartLoading() {
+            @Override
+            protected void onStartLoading() {
 
-                    if(lmovieArrayList==null)
-                    {
-                        mLoadingIndicator.setVisibility(View.VISIBLE);
-
-                        forceLoad();;
-                    }else
-                    {
-                        deliverResult(lmovieArrayList);
-                    }
+                if (mMovieData == null) {
+                    mLoadingIndicator.setVisibility(View.VISIBLE);
+                    Log.i("forceO","forceLOad");
+                    forceLoad();
+                    ;
+                } else {
+                    deliverResult(mMovieData);
                 }
+            }
 
-                @Override
-                protected void onForceLoad() {
-                    super.onForceLoad();
+            @Override
+            protected void onForceLoad() {
+                super.onForceLoad();
+            }
+
+            @Override
+            public void deliverResult(Cursor data) {
+                mMovieData = data;
+                super.deliverResult(data);
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+
+                try {
+                    return getContentResolver().query(MoviesContract.MoviesEntry.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            null);
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                    return null;
                 }
-
-                @Override
-                public void deliverResult(ArrayList<Movie> data) {
-                    lmovieArrayList=data;
-                    super.deliverResult(data);
-                }
-
-                @Override
-                public ArrayList<Movie> loadInBackground() {
-
-                    String prefernce = movieprefernce.getMoviePrfrnce();
-                    URL movieUrl = NetworkUtils.buildApiUrl(prefernce,MainActivity.APIKEY);
-                    Boolean isonline=isOnline();
-                    Log.d("isOnline",String.valueOf(isonline));
-                    if(!isOnline()) {
-                        return null;
-                    }
-
-                    try {
-                        String jsonMovies = NetworkUtils
-                                .getResponseFromHttpUrl(movieUrl);
-
-                        Log.v("MainActivity got json",jsonMovies);
-                        lmovieArrayList= MovieJSONUtils.getMoviesFromJSON(MainActivity.this,jsonMovies);
-
-
-
-
-
-                        return lmovieArrayList;
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                }
-            };
+            }
+        };
     }
-
-    @Override
-    public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> data) {
-        movieArrayList=data;
-        moviesAdapter.setMoviesData(data);
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        if (movieArrayList != null) {
-            showMoviesData();
-        } else {
-            showErrorView();
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
-
-    }
-
-
-
-
 
     /**
-     * checks the connectivity
-     * @return true if internet is available else false
+     * @param loader
+     * @param data   response data comes after querying the movies DB
      */
-    public  boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        return cm.getActiveNetworkInfo() != null &&
-                cm.getActiveNetworkInfo().isConnectedOrConnecting();
+        int crsrCount = data.getCount();
+        if(crsrCount>0){
+            showMoviesData();
+        }else
+        {
+            String msg=getString(R.string.noFavorites);
+            showErrorView(msg);
+        }
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        moviesCursorAdapter.swapCursor(data);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 
     /**
      * Inflate filter options menu
+     *
      * @param menu
      */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d("MANACTIVITY","createdddddddd menu");
+        Log.d("MANACTIVITY", "createdddddddd menu");
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.settings, menu);
@@ -266,31 +331,33 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     /**
      * is called everytime menu is created.
      * check the user prefernce and check the right option
+     *
      * @param menu
      */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Log.d("MANACTIVITY","preparecallleddddddddd");
+        Log.d("MANACTIVITY", "preparecallleddddddddd");
 
         /**
          * everytime menu is created check for user preference and set same menu to checked
          */
 
-        String menuItemSelected=movieprefernce.getMoviePrfrnce();
-        if (menuItemSelected!=null) {
+        String menuItemSelected = movieprefernce.getMoviePrfrnce();
+        if (menuItemSelected != null) {
             Log.d("MAINACTIVITY", menuItemSelected);
-            if(menuItemSelected.equals(PREFERENCEONE))
-            {
-                MenuItem menuitem= menu.findItem(R.id.popular_action);
+            if (menuItemSelected.equals(PREFERENCEONE)) {
+                MenuItem menuitem = menu.findItem(R.id.popular_action);
                 menuitem.setChecked(true);
 
+            } else if(menuItemSelected.equals(PREFERENCETWO)) {
+                MenuItem menuitem = menu.findItem(R.id.top_rated_action);
+                menuitem.setChecked(true);
             }else
             {
-                MenuItem menuitem= menu.findItem(R.id.top_rated_action);
+                MenuItem menuitem = menu.findItem(R.id.favourite_action);
                 menuitem.setChecked(true);
             }
-        }else
-        {
+        } else {
             movieprefernce.setMoviePrfrnce(PREFERENCEONE);
 
 
@@ -301,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     /**
      * handle click event on menu
+     *
      * @param item
      */
     @Override
@@ -313,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 loadPopularMovies(PREFERENCEONE);
                 return true;
             case R.id.favourite_action:
-                //yet to write here for favourite
+                loadFavoriteMovie(FAVORITEMOVIES);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -323,54 +391,75 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     /**
      * set the user preference as per selected option from menu setting.
      * setMoviePrfrnce method defined in MoviepPrefernces class
+     *
      * @param preference clicked from menu settings
      */
 
-    public void loadPopularMovies(String preference)
-    {
-       Boolean errorVisible= checkViewVisibility(mErrorMessageView);
+    public void loadPopularMovies(String preference) {
+        Boolean errorVisible = checkViewVisibility(mErrorMessageView);
         Boolean samePreference = movieprefernce.checkSamePreferenceClick(preference);
-        if(!samePreference || errorVisible)
-        {
-            movieArrayList=null;
+        if (!samePreference || errorVisible) {
+            movieArrayList = null;
             moviesAdapter.setMoviesData(null);
-            loaderManager.restartLoader(LOADER_ID,null,MainActivity.this);
+
+            mRecyclerView.setAdapter(moviesAdapter);
+
+            URL movieUrl = NetworkUtils.buildApiUrl(preference, MainActivity.APIKEY);
+
+            loadMoviesData(movieUrl.toString());
             movieprefernce.setMoviePrfrnce(preference);
 
         }
 
     }
-    public void loadTopRatedMovies(String preference)
-    {
-        Boolean errorVisible= checkViewVisibility(mErrorMessageView);
+
+    public void loadTopRatedMovies(String preference) {
+        Boolean errorVisible = checkViewVisibility(mErrorMessageView);
 
         Boolean samePreference = movieprefernce.checkSamePreferenceClick(preference);
-        if(!samePreference || errorVisible)
-        {
-            movieArrayList=null;
+        if (!samePreference || errorVisible) {
+            movieArrayList = null;
             moviesAdapter.setMoviesData(null);
-            /**
-             * restarts loader from begining and discards current loader
-             */
-            loaderManager.restartLoader(LOADER_ID,null,MainActivity.this);
+            mRecyclerView.setAdapter(moviesAdapter);
+
+            URL movieUrl = NetworkUtils.buildApiUrl(preference, MainActivity.APIKEY);
+
+            loadMoviesData(movieUrl.toString());
 
 
+            movieprefernce.setMoviePrfrnce(preference);
+        }
+
+    }
+
+
+    private void loadFavoriteMovie(String preference) {
+        Boolean errorVisible = checkViewVisibility(mErrorMessageView);
+
+        Boolean samePreference = movieprefernce.checkSamePreferenceClick(preference);
+        if (!samePreference || errorVisible) {
+            movieArrayList = null;
+            moviesAdapter.setMoviesData(null);
+            Bundle bundleForLoader = null;
+            mRecyclerView.setAdapter(moviesCursorAdapter);
+            loaderManager = getSupportLoaderManager();
+            Log.i("forceO","inittt");
+
+          loaderManager.initLoader(LOADER_ID, bundleForLoader, MainActivity.this);
             movieprefernce.setMoviePrfrnce(preference);
         }
 
     }
 
     /**
-     *
      * @param v type of view to check
      * @return true if view visible else false
      */
 
-    public boolean checkViewVisibility(View v)
-    {
-        int visible=v.getVisibility();
-        Log.i("MAINACTIVITY VISIBILITY",String.valueOf(visible));
-        if(visible==4)
+    public boolean checkViewVisibility(View v) {
+        int visible = v.getVisibility();
+        Log.i("MAINACTIVITY VISIBILITY", String.valueOf(visible));
+        if (visible == 4)
             return false;
         else
             return true;

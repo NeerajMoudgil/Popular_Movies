@@ -49,7 +49,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="34sp"
-
                     tools:text="okkkkkkkkkk" />
 
 
@@ -69,7 +68,7 @@
             </LinearLayout>
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab"
+                android:id="@+id/favoritebutn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -86,8 +85,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="8dp" />
+            android:paddingLeft="24dp"
+            android:paddingRight="8dp"
+            android:textSize="24sp" />
 
         <View
             android:layout_width="match_parent"
@@ -97,6 +97,7 @@
             android:background="@android:color/darker_gray" />
 
         <TextView
+            android:id="@+id/trailer_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp"
@@ -107,11 +108,10 @@
         <ListView
             android:id="@+id/trailersListview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            android:fadeScrollbars="false"></ListView>
+            android:layout_height="wrap_content"></ListView>
 
         <TextView
+            android:id="@+id/review_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp"

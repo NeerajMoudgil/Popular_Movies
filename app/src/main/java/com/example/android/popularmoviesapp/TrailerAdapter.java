@@ -31,8 +31,11 @@ public class TrailerAdapter extends ArrayAdapter<TrailerReview> {
     public int getCount() {
         if(trailerlist!=null)
             return trailerlist.size();
-        else
+        else {
+
             return 0;
+
+        }
     }
 
     @Nullable
@@ -55,6 +58,10 @@ public class TrailerAdapter extends ArrayAdapter<TrailerReview> {
 
         Log.i("TRIALER EVIEW DETAIL", trailerReview.getTrailename());
         TextView trailernameTextView = (TextView) listItemView.findViewById(R.id.trailerName);
+        //have to use outube thumbnail API
+        ImageView trailerImageView = (ImageView) listItemView.findViewById(R.id.imageTrailer);
+
+        trailerImageView.setVisibility(View.GONE);
         ImageView shareImageView = (ImageView) listItemView.findViewById(R.id.sharebutton);
 
 

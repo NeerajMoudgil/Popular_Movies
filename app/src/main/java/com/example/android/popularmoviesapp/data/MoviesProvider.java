@@ -1,6 +1,7 @@
 package com.example.android.popularmoviesapp.data;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -8,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import static com.example.android.popularmoviesapp.data.MoviesContract.MoviesEntry.TABLE_NAME;
 
 
 public class MoviesProvider extends ContentProvider {
@@ -45,7 +48,7 @@ public class MoviesProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case MOVIESALL: {
                 cursor = mmoviedbhelper.getReadableDatabase().query(
-                        MoviesContract.MoviesEntry.TABLE_NAME,
+                        TABLE_NAME,
                         projection,
                         selection,
                         selectionArg,
@@ -63,7 +66,7 @@ public class MoviesProvider extends ContentProvider {
                 String[] Selectionargs = new String[]{movieId};
 
                 cursor = mmoviedbhelper.getReadableDatabase().query(
-                        MoviesContract.MoviesEntry.TABLE_NAME,
+                        TABLE_NAME,
                         projection,
                         selection + " = ?  ",
                         Selectionargs,
@@ -92,7 +95,37 @@ public class MoviesProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
-        return null;
+        Log.i("MOVIEPROVIDER URI", uri.toString());
+
+
+
+        final SQLiteDatabase db = mmoviedbhelper.getWritableDatabase();
+
+
+        int match = sUriMatcher.match(uri);
+        Uri returnUri;
+
+        switch (match) {
+            case MOVIESALL:
+
+                long id = db.insert(TABLE_NAME, null, contentValues);
+                Log.i("dataInserted",String.valueOf(id));
+                if ( id > 0 ) {
+                    returnUri = ContentUris.withAppendedId(MoviesContract.MoviesEntry.CONTENT_URI, id);
+                } else {
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+
+        getContext().getContentResolver().notifyChange(uri, null);
+
+
+        return returnUri;
     }
 
 
@@ -109,7 +142,7 @@ public class MoviesProvider extends ContentProvider {
                     for (ContentValues value : values) {
 
 
-                        long _id = db.insert(MoviesContract.MoviesEntry.TABLE_NAME, null, value);
+                        long _id = db.insert(TABLE_NAME, null, value);
                         if (_id != -1) {
                             rowsInserted++;
                         }
@@ -133,7 +166,25 @@ public class MoviesProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String s, String[] strings) {
-        return 0;
+        final SQLiteDatabase db = mmoviedbhelper.getWritableDatabase();
+        int id;
+        switch (sUriMatcher.match(uri)) {
+            case MOVIESBYID:
+                String movieId = uri.getPathSegments().get(1);
+
+                id = db.delete(TABLE_NAME, MoviesContract.MoviesEntry.COLUMN_MOVIEID+"=?", new String[]{movieId});
+
+                Log.i("DELETED",String.valueOf(id));
+
+            break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+
+
+        }
+
+
+        return id;
     }
 
     @Override
@@ -144,7 +195,7 @@ public class MoviesProvider extends ContentProvider {
                 String movieId = uri.getLastPathSegment();
 
                 String[] whereargs = new String[]{movieId};
-              updatedrow=   mmoviedbhelper.getWritableDatabase().update(MoviesContract.MoviesEntry.TABLE_NAME, contentValues,
+              updatedrow=   mmoviedbhelper.getWritableDatabase().update(TABLE_NAME, contentValues,
                         whereclause + " = ?  ", whereargs);
 
 

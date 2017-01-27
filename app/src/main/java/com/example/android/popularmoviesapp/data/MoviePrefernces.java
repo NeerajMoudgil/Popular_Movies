@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 
-
 public class MoviePrefernces {
     private SharedPreferences sharedPreferences;
     private final static String MYPREFERENCE="mypreference";
     private final static String MOVIESETTING="moviesetting";
     private final static String FIRSTPREFERENCE="popular";
+
     private String moviefilter;
 
     /**
@@ -35,6 +35,7 @@ public class MoviePrefernces {
             moviefilter=FIRSTPREFERENCE;
             setMoviePrfrnce(FIRSTPREFERENCE);
         }
+      
         return moviefilter;
     }
 

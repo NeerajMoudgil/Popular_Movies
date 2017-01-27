@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Popular Movies App</string>
     <string name="noData">Problem loading data. Please Try Again Later!!</string>
+    <string name="noFavorites">There are no favorites yet</string>
     <string name="movieAPIKEY">APIKEY</string>
     <string name="popular_movies">Popular Movies</string>
     <string name="toprated_movies">Top Rated Movies</string>
