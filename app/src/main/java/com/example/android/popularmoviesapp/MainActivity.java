@@ -26,12 +26,12 @@ import com.example.android.popularmoviesapp.utilities.NetworkUtils;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler, NetworkUtils.onResponseHandler, LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler,MoviesCursorAdapter.MoviesCursorOnClickHandler,NetworkUtils.onResponseHandler, LoaderManager.LoaderCallbacks<Cursor> {
 
 
     private final static String PREFERENCEONE = "popular";
     private final static String PREFERENCETWO = "top_rated";
-    private final static String FAVORITEMOVIES = "favorite";
+    public final static String FAVORITEMOVIES = "favorite";
     private final static int LOADER_ID = 0;
     private MoviePrefernces movieprefernce;
     private RecyclerView mRecyclerView;
@@ -130,6 +130,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i("inResume", "inResume");
+        String prefernce = movieprefernce.getMoviePrfrnce();
+        if (prefernce.equals(FAVORITEMOVIES)) {
+            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        }
+
     }
 
     @Override
@@ -235,6 +241,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         startActivity(intent);
     }
 
+    @Override
+    public void onClickCursor(Movie movie) {
+        onClick(movie);
+
+    }
+
     /**
      * getting data from local DB for favourite movies using contentProvider
      */
@@ -246,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             @Override
             protected void onStartLoading() {
 
-                if (mMovieData == null) {
+                if (mMovieData == null || MovieDetails.favoriteChanged ) {
                     mLoadingIndicator.setVisibility(View.VISIBLE);
                     Log.i("forceO","forceLOad");
                     forceLoad();
@@ -323,8 +335,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.settings, menu);
-
-
         return true;
     }
 
@@ -464,6 +474,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         else
             return true;
     }
+
 
 
 }

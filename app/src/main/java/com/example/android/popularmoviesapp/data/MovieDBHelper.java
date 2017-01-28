@@ -20,7 +20,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         final String CREATE_STATEMENT = "CREATE TABLE " + MoviesContract.MoviesEntry.TABLE_NAME + " (" +
 
 
-                MoviesContract.MoviesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                MoviesContract.MoviesEntry._ID + " INTEGER  AUTOINCREMENT, " +
 
                 MoviesContract.MoviesEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
 
@@ -28,7 +28,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
 
                 MoviesContract.MoviesEntry.COLUMN_SYNOPSIS + " TEXT NOT NULL, " +
                 MoviesContract.MoviesEntry.COLUMN_USERRATING + " INTEGER NOT NULL, " +
-                MoviesContract.MoviesEntry.COLUMN_MOVIEID + " INTEGER NOT NULL, " +
+                MoviesContract.MoviesEntry.COLUMN_MOVIEID + " INTEGER PRIMARY KEY NOT NULL, " +
                 MoviesContract.MoviesEntry.COLUMN_FAVOURITE + " INTEGER NOT NULL DEFAULT 0, " +
                 MoviesContract.MoviesEntry.COLUMN_RELEASEDATE + " TEXT NOT NULL)";
 

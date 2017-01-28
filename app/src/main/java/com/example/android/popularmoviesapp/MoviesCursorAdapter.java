@@ -11,8 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.popularmoviesapp.data.Movie;
 import com.example.android.popularmoviesapp.data.MoviesContract;
 import com.squareup.picasso.Picasso;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Adapter class for DB cursor query data
@@ -22,10 +26,22 @@ public class MoviesCursorAdapter extends RecyclerView.Adapter<MoviesCursorAdapte
 
     private Cursor mCursor;
     private Context mContext;
+    private final MoviesCursorOnClickHandler mClickHandler;
+
 
 
     public MoviesCursorAdapter(Context mContext) {
         this.mContext = mContext;
+        mClickHandler=(MoviesCursorOnClickHandler)mContext;
+    }
+
+
+
+    /**
+     * The interface that provides onclick.
+     */
+    public interface MoviesCursorOnClickHandler {
+        void onClickCursor(Movie movie);
     }
 
 
@@ -109,7 +125,7 @@ public class MoviesCursorAdapter extends RecyclerView.Adapter<MoviesCursorAdapte
     }
 
 
-    class MoviesAdapterViewHolder extends RecyclerView.ViewHolder {
+    class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
 
         public final ImageView mImageView;
@@ -119,9 +135,37 @@ public class MoviesCursorAdapter extends RecyclerView.Adapter<MoviesCursorAdapte
             super(itemView);
             mImageView = (ImageView) itemView.findViewById(R.id.movie_poster);
             mnoImageTextView = (TextView) itemView.findViewById(R.id.noposter_tittle);
+            itemView.setOnClickListener(this);
 
         }
 
 
+        @Override
+        public void onClick(View view) {
+            int adapterPosition=getAdapterPosition();
+            mCursor.moveToPosition(adapterPosition);
+            int titleIndex = mCursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TITLE);
+            int posterIndex = mCursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_POSTER);
+            int ratingIndex = mCursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_USERRATING);
+            int overviewIndex = mCursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS);
+            int dateIndex = mCursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_RELEASEDATE);
+            int movieIDIndex = mCursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_MOVIEID);
+            String movieTitle = mCursor.getString(titleIndex);
+            String posterPath = mCursor.getString(posterIndex);
+            URL posterurl=null;
+            try {
+                 posterurl= new URL(posterPath);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            String overview = mCursor.getString(overviewIndex);
+            String relsDate = mCursor.getString(dateIndex);
+            long rating=(long)mCursor.getInt(ratingIndex);
+            long movieID=(long)mCursor.getInt(movieIDIndex);
+
+            Movie movieClicked= new Movie(movieTitle,rating,0,overview,relsDate,posterurl,movieID);
+            Log.i("gotMoview",movieTitle);
+            mClickHandler.onClickCursor(movieClicked);
+        }
     }
 }

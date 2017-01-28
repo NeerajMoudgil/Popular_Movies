@@ -1,26 +1,29 @@
  package com.example.android.popularmoviesapp;
 
  import android.content.ContentValues;
- import android.content.Intent;
- import android.net.Uri;
- import android.os.Bundle;
- import android.support.design.widget.FloatingActionButton;
- import android.support.v7.app.AppCompatActivity;
- import android.util.Log;
- import android.view.View;
- import android.widget.AdapterView;
- import android.widget.ImageView;
- import android.widget.ListView;
- import android.widget.TextView;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
+ import com.example.android.popularmoviesapp.data.MoviePrefernces;
  import com.example.android.popularmoviesapp.data.MoviesContract;
- import com.example.android.popularmoviesapp.data.TrailerReview;
- import com.example.android.popularmoviesapp.utilities.NetworkUtils;
- import com.example.android.popularmoviesapp.utilities.TrailerReviewJSONUtils;
- import com.squareup.picasso.Picasso;
+import com.example.android.popularmoviesapp.data.TrailerReview;
+import com.example.android.popularmoviesapp.utilities.NetworkUtils;
+import com.example.android.popularmoviesapp.utilities.TrailerReviewJSONUtils;
+import com.squareup.picasso.Picasso;
 
- import java.net.URL;
- import java.util.ArrayList;
+import java.net.URL;
+import java.util.ArrayList;
 
  public class MovieDetails extends AppCompatActivity implements  NetworkUtils.onResponseHandler{
     private ImageView imageView;
@@ -38,6 +41,7 @@
      private ReviewAdapter reviewAdapter;
      private long movieId;
 
+     public static boolean favoriteChanged=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +54,7 @@
         textViewReviews=(TextView)findViewById(R.id.review_text);
 
         favoriteButton= (FloatingActionButton)findViewById((R.id.favoritebutn));
-        favoriteButton.setTag(R.id.favouritemovie,R.drawable.ic_favorite_border_white_24dp);
+
 
 
 
@@ -92,6 +96,13 @@
         if(intent.hasExtra("movieID"))
         {
             movieId=intent.getLongExtra("movieID",0);
+            String prefernce = new MoviePrefernces(this).getMoviePrfrnce();
+            if (prefernce.equals(MainActivity.FAVORITEMOVIES)) {
+                favoriteButton.setImageResource(R.drawable.ic_favorite_white_24dp);
+                favoriteButton.setTag(R.id.favouritemovie,R.drawable.ic_favorite_white_24dp);
+            }else {
+                new checkMovieFavorite().execute(movieId);
+            }
             URL reviewtrailerURL=NetworkUtils.buildReviewTrailerURL(movieId,MainActivity.APIKEY );
 
             NetworkUtils.getResponseUsingVolley(reviewtrailerURL.toString(),this);
@@ -126,6 +137,7 @@
             public void onClick(View view) {
 
                 int currentImage=(Integer) favoriteButton.getTag(R.id.favouritemovie);
+                favoriteChanged=true;
                 if(currentImage==R.drawable.ic_favorite_white_24dp)
                 {
                     favoriteButton.setImageResource(R.drawable.ic_favorite_border_white_24dp);
@@ -137,9 +149,6 @@
                     favoriteButton.setImageResource(R.drawable.ic_favorite_white_24dp);
                     favoriteButton.setTag(R.id.favouritemovie,R.drawable.ic_favorite_white_24dp);
                     insertMovietoFAvorite(title,posterpath,overview,rating,releaseDate,0,movieId);
-
-
-
 
                 }
                 Log.i("currentImg",String.valueOf(currentImage));
@@ -157,6 +166,35 @@
          ArrayList<TrailerReview> reviewlist=TrailerReviewJSONUtils.getReviewsFromJSON(response);
          reviewAdapter.setReviewlist(reviewlist);
 
+     }
+
+     public class checkMovieFavorite extends AsyncTask<Long, Void, Cursor> {
+
+         @Override
+         protected Cursor doInBackground(Long... longs) {
+             long movieId= longs[0];
+             Uri movieUri= MoviesContract.MoviesEntry.buildMovieUriWithId(movieId);
+             return getContentResolver().query(movieUri,null, MoviesContract.MoviesEntry.COLUMN_MOVIEID,null,null);
+         }
+
+         @Override
+         protected void onPostExecute(Cursor cursor) {
+             int cursorCount= cursor.getCount();
+             setFavriteImage(cursorCount);
+         }
+     }
+
+     private void setFavriteImage(int count)
+     {
+         if(count>0)
+         {
+             favoriteButton.setImageResource(R.drawable.ic_favorite_white_24dp);
+             favoriteButton.setTag(R.id.favouritemovie,R.drawable.ic_favorite_white_24dp);
+         }else
+         {
+             favoriteButton.setImageResource(R.drawable.ic_favorite_border_white_24dp);
+             favoriteButton.setTag(R.id.favouritemovie,R.drawable.ic_favorite_border_white_24dp);
+         }
      }
 
      public void runTrailer(String url)
