@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +59,8 @@ public class TrailerAdapter extends ArrayAdapter<TrailerReview> {
 
         Log.i("TRIALER EVIEW DETAIL", trailerReview.getTrailename());
         TextView trailernameTextView = (TextView) listItemView.findViewById(R.id.trailerName);
-        //have to use outube thumbnail API
+        trailernameTextView.setGravity(Gravity.CENTER);
+        //have to use for youtube thumbnail API
         ImageView trailerImageView = (ImageView) listItemView.findViewById(R.id.imageTrailer);
 
         trailerImageView.setVisibility(View.GONE);

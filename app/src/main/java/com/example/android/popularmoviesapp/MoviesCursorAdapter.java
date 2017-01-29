@@ -118,7 +118,6 @@ public class MoviesCursorAdapter extends RecyclerView.Adapter<MoviesCursorAdapte
         this.mCursor = c;
 
         if (c != null) {
-            Log.i("heer", "notifyDataSetChanged");
             this.notifyDataSetChanged();
         }
         return temp;

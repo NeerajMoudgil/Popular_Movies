@@ -26,6 +26,13 @@ import com.example.android.popularmoviesapp.utilities.NetworkUtils;
 import java.net.URL;
 import java.util.ArrayList;
 
+/**
+ *for DB content Provider taken help from projects given during course
+ * floatingActionbutton taken help from https://guides.codepath.com/android/floating-action-buttons
+ * Sharing and opening trailers taken help from Android developer site and stackOverflow
+ * Fixed issue of listviewHeight inside ScroolView from http://stackoverflow.com/questions/18367522/android-list-view-inside-a-scroll-view/20475821#20475821
+ */
+
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler,MoviesCursorAdapter.MoviesCursorOnClickHandler,NetworkUtils.onResponseHandler, LoaderManager.LoaderCallbacks<Cursor> {
 
 
@@ -474,6 +481,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         else
             return true;
     }
+
+
 
 
 
