@@ -20,7 +20,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         final String CREATE_STATEMENT = "CREATE TABLE " + MoviesContract.MoviesEntry.TABLE_NAME + " (" +
 
 
-                MoviesContract.MoviesEntry._ID + " INTEGER  AUTOINCREMENT, " +
+                MoviesContract.MoviesEntry._ID + " INTEGER, " +
 
                 MoviesContract.MoviesEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
 

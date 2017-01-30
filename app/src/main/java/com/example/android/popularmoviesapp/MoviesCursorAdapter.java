@@ -33,6 +33,7 @@ public class MoviesCursorAdapter extends RecyclerView.Adapter<MoviesCursorAdapte
     public MoviesCursorAdapter(Context mContext) {
         this.mContext = mContext;
         mClickHandler=(MoviesCursorOnClickHandler)mContext;
+        mCursor=Movie.oldCursor;
     }
 
 
@@ -109,18 +110,19 @@ public class MoviesCursorAdapter extends RecyclerView.Adapter<MoviesCursorAdapte
      * When data changes and a re-query occurs, this function swaps the old Cursor
      * with a newly updated Cursor (Cursor c) that is passed in.
      */
-    public Cursor swapCursor(Cursor c) {
-
+    public void swapCursor(Cursor c) {
         if (mCursor == c) {
-            return null;
+            Log.i("sameCursor","sameCursor");
+            return;
         }
-        Cursor temp = mCursor;
-        this.mCursor = c;
+
+       mCursor = c;
 
         if (c != null) {
             this.notifyDataSetChanged();
+
         }
-        return temp;
+
     }
 
 

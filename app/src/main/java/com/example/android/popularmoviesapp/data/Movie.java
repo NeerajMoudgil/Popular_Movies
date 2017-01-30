@@ -1,5 +1,6 @@
 package com.example.android.popularmoviesapp.data;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -18,6 +19,8 @@ public class Movie implements Parcelable{
     private URL posterPath;
 
     private long movieId;
+
+    public static Cursor oldCursor=null;
 
     /**
      * constructor Creates movie object

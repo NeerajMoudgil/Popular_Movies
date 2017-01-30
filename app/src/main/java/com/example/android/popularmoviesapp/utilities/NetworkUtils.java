@@ -12,12 +12,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Scanner;
 
 
 public class NetworkUtils {
@@ -98,25 +94,6 @@ public class NetworkUtils {
         return BASE_YOUTUBE_URL + trailerID;
     }
 
-
-    public static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-
-        try {
-            InputStream in = httpURLConnection.getInputStream();
-
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
-
-            boolean hasInput = scanner.hasNext();
-            if (hasInput) {
-                return scanner.next();
-            } else
-                return null;
-        } finally {
-            httpURLConnection.disconnect();
-        }
-    }
 
     public static void getResponseUsingVolley(String url, Context context) {
         boolean isOnline = isOnline(context);

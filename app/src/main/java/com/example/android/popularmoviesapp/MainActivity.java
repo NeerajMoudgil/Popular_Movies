@@ -1,6 +1,7 @@
 package com.example.android.popularmoviesapp;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -27,13 +28,14 @@ import java.net.URL;
 import java.util.ArrayList;
 
 /**
- *for DB content Provider taken help from projects given during course
+ * for DB content Provider taken help from projects given during course
  * floatingActionbutton taken help from https://guides.codepath.com/android/floating-action-buttons
  * Sharing and opening trailers taken help from Android developer site and stackOverflow
  * Fixed issue of listviewHeight inside ScroolView from http://stackoverflow.com/questions/18367522/android-list-view-inside-a-scroll-view/20475821#20475821
+ *  For collapsible toolBarLayout taken help from http://antonioleiva.com/collapsing-toolbar-layout/
  */
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler,MoviesCursorAdapter.MoviesCursorOnClickHandler,NetworkUtils.onResponseHandler, LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesOnClickHandler, MoviesCursorAdapter.MoviesCursorOnClickHandler, NetworkUtils.onResponseHandler, LoaderManager.LoaderCallbacks<Cursor> {
 
 
     private final static String PREFERENCEONE = "popular";
@@ -68,7 +70,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        APIKEY = getString(R.string.movieAPIKEY);
+
+
+        APIKEY = BuildConfig.MOVIEDB_API_KEY;
         moviesAdapter = new MoviesAdapter(this);
         moviesCursorAdapter = new MoviesCursorAdapter(this);
 
@@ -78,16 +82,25 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         mRecyclerView.setAdapter(moviesAdapter);
 
-        GridLayoutManager layoutManager
-                = new GridLayoutManager(this, 2);
+       // GridLayoutManager layoutManager= new GridLayoutManager(this, 2);
 
-        mRecyclerView.setLayoutManager(layoutManager);
+//        mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
 
         mErrorMessageView = (TextView) findViewById(R.id.error_msg);
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
+        /**
+         * change the no. of movies column view on orientation
+         */
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        }
+        else{
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        }
 
 
         if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
@@ -110,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
                     if (prefernce.equals(FAVORITEMOVIES)) {
                         mRecyclerView.setAdapter(moviesCursorAdapter);
-                       getSupportLoaderManager().initLoader(LOADER_ID, null, MainActivity.this);
+                        getSupportLoaderManager().initLoader(LOADER_ID, null, MainActivity.this);
 
                     } else {
 
@@ -134,12 +147,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         Log.i("onpause", "onpause");
         super.onPause();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         Log.i("inResume", "inResume");
         String prefernce = movieprefernce.getMoviePrfrnce();
-        if (prefernce.equals(FAVORITEMOVIES)) {
+        if (prefernce.equals(FAVORITEMOVIES) && MovieDetails.favoriteChanged) {
+            Log.i("loaderrestated", "resumeloader resarted");
             getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
         }
 
@@ -151,7 +166,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         String prefernce = movieprefernce.getMoviePrfrnce();
         // not required for cursor as already handled by loaderCallback
         if (prefernce.equals(FAVORITEMOVIES)) {
-        return;
+            super.onSaveInstanceState(outState);
+            return;
         }
         outState.putParcelableArrayList("movies", movieArrayList);
 
@@ -176,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onResponse(String response) {
-        String msg=getString(R.string.noData);
+        String msg = getString(R.string.noData);
         try {
 
             if (response == null) {
@@ -215,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     /**
      * shows error view if fail to fetch movies
      * hides view that will show movies
+     *
      * @param message
      */
 
@@ -223,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageView.setText(message);
         mErrorMessageView.setVisibility(View.VISIBLE);
-      ;
+        ;
     }
 
     /**
@@ -245,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         intent.putExtra("posterpath", movie.getPosterPath().toString());
         intent.putExtra("movieID", movie.getMovieId());
         Log.i("mainactivity mivuie id", String.valueOf(movie.getMovieId()));
+        MovieDetails.favoriteChanged = false;
         startActivity(intent);
     }
 
@@ -265,9 +283,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             @Override
             protected void onStartLoading() {
 
-                if (mMovieData == null || MovieDetails.favoriteChanged ) {
+                if (mMovieData == null || MovieDetails.favoriteChanged) {
                     mLoadingIndicator.setVisibility(View.VISIBLE);
-                    Log.i("forceO","forceLOad");
+                    Log.i("forceO", "forceLOad");
                     forceLoad();
                     ;
                 } else {
@@ -313,14 +331,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         int crsrCount = data.getCount();
-        if(crsrCount>0){
+        if (crsrCount > 0) {
             showMoviesData();
-        }else
-        {
-            String msg=getString(R.string.noFavorites);
+        } else {
+            String msg = getString(R.string.noFavorites);
             showErrorView(msg);
         }
         mLoadingIndicator.setVisibility(View.INVISIBLE);
+        Movie.oldCursor = data;
         moviesCursorAdapter.swapCursor(data);
 
     }
@@ -366,11 +384,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 MenuItem menuitem = menu.findItem(R.id.popular_action);
                 menuitem.setChecked(true);
 
-            } else if(menuItemSelected.equals(PREFERENCETWO)) {
+            } else if (menuItemSelected.equals(PREFERENCETWO)) {
                 MenuItem menuitem = menu.findItem(R.id.top_rated_action);
                 menuitem.setChecked(true);
-            }else
-            {
+            } else {
                 MenuItem menuitem = menu.findItem(R.id.favourite_action);
                 menuitem.setChecked(true);
             }
@@ -460,9 +477,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             Bundle bundleForLoader = null;
             mRecyclerView.setAdapter(moviesCursorAdapter);
             loaderManager = getSupportLoaderManager();
-            Log.i("forceO","inittt");
+            Log.i("forceO", "inittt");
 
-          loaderManager.initLoader(LOADER_ID, bundleForLoader, MainActivity.this);
+            loaderManager.initLoader(LOADER_ID, bundleForLoader, MainActivity.this);
             movieprefernce.setMoviePrfrnce(preference);
         }
 
@@ -481,9 +498,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         else
             return true;
     }
-
-
-
 
 
 }

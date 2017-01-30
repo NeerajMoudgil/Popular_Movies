@@ -6,8 +6,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 
 public class MovieDetails extends AppCompatActivity implements NetworkUtils.onResponseHandler {
     private ImageView imageView;
+    private ImageView imageViewPoster;
     private TextView textViewReleaseDt;
     private TextView textViewTitle;
     private TextView textViewRating;
@@ -40,7 +44,7 @@ public class MovieDetails extends AppCompatActivity implements NetworkUtils.onRe
     private TrailerAdapter trailerAdapter;
     private ReviewAdapter reviewAdapter;
     private long movieId;
-
+    private CollapsingToolbarLayout collapsingToolbarLayout;
     public static boolean favoriteChanged = false;
 
     @Override
@@ -48,7 +52,12 @@ public class MovieDetails extends AppCompatActivity implements NetworkUtils.onRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
 
-        textViewTitle = (TextView) findViewById(R.id.movie_title);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         textViewReleaseDt = (TextView) findViewById(R.id.movie_releasedt);
 
@@ -58,7 +67,8 @@ public class MovieDetails extends AppCompatActivity implements NetworkUtils.onRe
         textViewRating = (TextView) findViewById(R.id.rating);
         textViewOverview = (TextView) findViewById(R.id.movie_overview);
 
-        imageView = (ImageView) findViewById(R.id.movie_img);
+        imageView = (ImageView) findViewById(R.id.bigPoster);
+        imageViewPoster = (ImageView) findViewById(R.id.movie_img);
 
         trailerAdapter = new TrailerAdapter(this, 0, null);
         reviewAdapter = new ReviewAdapter(this, 0, null);
@@ -108,7 +118,7 @@ public class MovieDetails extends AppCompatActivity implements NetworkUtils.onRe
 
         }
         if (title != null) {
-            textViewTitle.setText(title);
+            collapsingToolbarLayout.setTitle(title);
         }
         if (releaseDate != null) {
             textViewReleaseDt.setText(releaseDate.substring(0, 4));
@@ -118,6 +128,8 @@ public class MovieDetails extends AppCompatActivity implements NetworkUtils.onRe
         }
         if (posterpath != null) {
             Picasso.with(this).load(posterpath).into(imageView);
+            Picasso.with(this).load(posterpath).into(imageViewPoster);
+
 
         }
         if (overview != null) {

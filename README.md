@@ -10,7 +10,7 @@
 
 ## Sample url: http://api.themoviedb.org/3/movie/popular?api_key=[YOUR_API_KEY]
 
-## After getting API_KEY paste your key in strings.xml under res folder. 
+## After getting API_KEY paste your key MainActivity.java removing BuildConfig.MOVIEDB_API_KEY
 
 # Library used
 
